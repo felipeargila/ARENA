@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quiz Arena</title>
+  <title>Quiz Arena Educativo</title>
   <style>
     * { box-sizing: border-box; }
     :root {
@@ -28,7 +28,7 @@
       padding: 24px;
     }
     .wrap {
-      max-width: 1100px;
+      max-width: 1160px;
       margin: 0 auto;
     }
     .panel {
@@ -51,6 +51,11 @@
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
     }
     .hidden { display: none !important; }
@@ -155,6 +160,21 @@
       margin-bottom: 10px;
       font-weight: 800;
     }
+    .player-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(34,197,94,0.2);
+      border: 2px solid rgba(34,197,94,0.8);
+      color: #dcfce7;
+      border-radius: 999px;
+      padding: 14px 26px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+      min-height: 56px;
+      box-shadow: 0 8px 24px rgba(34,197,94,0.18);
+    }
     .question {
       font-size: 1.35rem;
       line-height: 1.5;
@@ -169,7 +189,7 @@
     }
     .status-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-top: 16px;
     }
@@ -186,7 +206,7 @@
       font-weight: 800;
     }
     .status-value {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
     }
     .options {
@@ -213,12 +233,6 @@
     .option-btn.wrong {
       background: rgba(248,113,113,0.2);
       border-color: rgba(248,113,113,0.8);
-    }
-    .lifelines {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 16px;
     }
     .history {
       background: rgba(0,0,0,0.22);
@@ -259,8 +273,13 @@
       margin-bottom: 8px;
       color: #e5e7eb;
     }
+    .setup-note {
+      margin-top: 12px;
+      color: #93c5fd;
+      font-size: 0.92rem;
+    }
     @media (max-width: 900px) {
-      .grid, .grid-3, .scoreboard, .status-row, .options, .mode-card-wrap { grid-template-columns: 1fr; }
+      .grid, .grid-3, .grid-4, .scoreboard, .status-row, .options, .mode-card-wrap { grid-template-columns: 1fr; }
       .points { font-size: 2.4rem; }
       .question { font-size: 1.1rem; }
     }
@@ -269,8 +288,8 @@
 <body>
   <div class="wrap">
     <div class="panel" id="setupPanel">
-      <h1>🏁 Quiz Arena</h1>
-      <p>Escolha o modo, defina o torneio e jogue um quiz automático com perguntas geradas por base local, validação automática, placar e histórico de campeões.</p>
+      <h1>🏁 Quiz Arena Educativo</h1>
+      <p>Quiz automático com modo solo ou duelo, perguntas reais, categorias configuráveis, dificuldade e timer ajustável.</p>
 
       <div class="mode-card-wrap">
         <div class="mode-card active" id="soloModeCard">
@@ -310,14 +329,41 @@
         </div>
       </div>
 
-      <div class="row" style="margin-top: 18px;">
-        <button class="secondary" id="previewBtn">Gerar prévia</button>
-        <button class="primary" id="startBtn">Iniciar jogo</button>
+      <div class="grid-3" style="margin-top: 16px;">
+        <div>
+          <label for="themeSelect">Tema da partida</label>
+          <select id="themeSelect">
+            <option value="misto" selected>Misto</option>
+            <option value="politica">Política do Brasil</option>
+            <option value="futebol">Futebol</option>
+            <option value="historia">História</option>
+            <option value="gerais">Conhecimentos Gerais</option>
+          </select>
+        </div>
+        <div>
+          <label for="difficultySelect">Dificuldade</label>
+          <select id="difficultySelect">
+            <option value="misto" selected>Mista</option>
+            <option value="facil">Fácil</option>
+            <option value="medio">Médio</option>
+            <option value="dificil">Difícil</option>
+            <option value="lendario">Lendário</option>
+          </select>
+        </div>
+        <div>
+          <label for="timerSelect">Tempo por pergunta</label>
+          <select id="timerSelect">
+            <option value="10">10 segundos</option>
+            <option value="15" selected>15 segundos</option>
+            <option value="20">20 segundos</option>
+          </select>
+        </div>
       </div>
 
-      <div class="panel" style="margin-top: 20px; padding: 18px;">
-        <h3>Prévia de perguntas</h3>
-        <p id="previewText" class="mini">Clique em “Gerar prévia” para ver exemplos de perguntas.</p>
+      <div class="setup-note" id="poolInfo"></div>
+
+      <div class="row" style="margin-top: 18px;">
+        <button class="primary" id="startBtn">Iniciar jogo</button>
       </div>
 
       <div class="panel champions" style="padding: 18px;">
@@ -349,20 +395,24 @@
         </div>
         <div class="status-box">
           <div class="status-title">Categoria</div>
-          <div class="status-value" id="categoryText">Política</div>
+          <div class="status-value" id="categoryText">Política do Brasil</div>
+        </div>
+        <div class="status-box">
+          <div class="status-title">Dificuldade</div>
+          <div class="status-value" id="difficultyText">Fácil</div>
         </div>
         <div class="status-box">
           <div class="status-title">Tempo</div>
-          <div class="status-value" id="timerText">20s</div>
+          <div class="status-value" id="timerText">15s</div>
         </div>
       </div>
 
       <div class="question-box">
-        <div class="question-label" id="turnText">Vez de Jogador 1</div>
+        <div class="player-badge" id="turnBadge">Vez de Jogador 1</div>
+        <div class="question-label">Escolha a alternativa correta</div>
         <div class="question" id="questionText"></div>
         <div class="options" id="optionsWrap"></div>
-        <div class="lifelines">
-          <button class="warning" id="fiftyBtn">50/50</button>
+        <div class="row" style="margin-top: 16px;">
           <button class="muted-btn" id="skipBtn">Pular pergunta</button>
         </div>
         <div class="mini" id="feedbackText"></div>
@@ -382,106 +432,232 @@
   </div>
 
   <script>
-    const questionBase = {
-      politica: [
-        {
-          question: 'Qual foi o primeiro partido de Aécio Neves?',
-          options: ['PSDB', 'PMDB', 'PFL', 'PTB'],
-          correct: 'PMDB'
-        },
-        {
-          question: 'Quando Ciro Gomes foi candidato a presidente?',
-          options: ['1998, 2002, 2018 e 2022', '1994, 1998, 2014 e 2022', '2002, 2006, 2010 e 2022', '1998, 2006, 2014 e 2018'],
-          correct: '1998, 2002, 2018 e 2022'
-        },
-        {
-          question: 'Qual partido foi citado como criação recente no jogo?',
-          options: ['Partido Missão', 'Novo Centro', 'Partido Brasil Unido', 'Frente Popular Nacional'],
-          correct: 'Partido Missão'
-        },
-        {
-          question: 'Quem foi citado como governador de Goiás nas conversas sobre 2026?',
-          options: ['Ronaldo Caiado', 'Romeu Zema', 'Tarcísio de Freitas', 'Ratinho Júnior'],
-          correct: 'Ronaldo Caiado'
-        }
-      ],
-      futebol: [
-        {
-          question: 'Qual é o estádio do Goiatuba?',
-          options: ['Estádio Divino Garcia Rosa', 'Serra Dourada', 'Mineirão', 'Morumbi'],
-          correct: 'Estádio Divino Garcia Rosa'
-        },
-        {
-          question: 'Quem venceu a Copa Pistão em Carros 1?',
-          options: ['Relâmpago McQueen', 'Chick Hicks', 'The King', 'Guido'],
-          correct: 'Chick Hicks'
-        }
-      ],
-      pokemon: [
-        {
-          question: 'Qual foi o primeiro Pokémon criado?',
-          options: ['Bulbasaur', 'Rhydon', 'Mew', 'Pikachu'],
-          correct: 'Rhydon'
-        },
-        {
-          question: 'No jogo anterior, qual resposta automática estava errada sobre Pokémon GO?',
-          options: ['Rolycoly', 'Pikachu', 'Mewtwo', 'Togepi'],
-          correct: 'Rolycoly'
-        }
-      ],
-      internet: [
-        {
-          question: 'No torneio, qual apelido foi dado para Gemini?',
-          options: ['Mano Google', 'Professor Calmo', 'Zuckbot', 'Troll do Espaço'],
-          correct: 'Mano Google'
-        },
-        {
-          question: 'Qual apelido foi dado para DeepSeek?',
-          options: ['Baleia Ruim', 'Detetive da Internet', 'Vento Francês', 'Parceiro da Microsoft'],
-          correct: 'Baleia Ruim'
-        },
-        {
-          question: 'Em uma das rodadas, qual criador foi usado na pergunta sobre vídeo mais recente?',
-          options: ['Guto Zacarias', 'Felca', 'Luba', 'Orochinho'],
-          correct: 'Guto Zacarias'
-        }
-      ],
-      pegadinhas: [
-        {
-          question: 'No jogo, qual letra apareceu na pergunta sobre o nome do usuário?',
-          options: ['K ou C', 'A ou E', 'M ou N', 'R ou S'],
-          correct: 'K ou C'
-        },
-        {
-          question: 'No dilema do trem, qual foi a tendência de resposta adotada?',
-          options: ['Puxar a alavanca para salvar as 5', 'Não agir em hipótese alguma', 'Salvar apenas 1', 'Ignorar o dilema'],
-          correct: 'Puxar a alavanca para salvar as 5'
-        },
-        {
-          question: 'No Minecraft hardcore, qual foi a resposta direta dada no torneio?',
-          options: ['Sim', 'Não', 'Depende', 'Talvez'],
-          correct: 'Sim'
-        }
-      ],
-      cultura_pop: [
-        {
-          question: 'Quem foi bicampeão da Copa pIAstão?',
-          options: ['Mano Google', 'Gepeteta', 'DeepSeek', 'Claude'],
-          correct: 'Mano Google'
-        },
-        {
-          question: 'Qual foi o placar final citado na segunda Copa pIAstão?',
-          options: ['7x6 para o Mano Google', '8x6 para o Gepeteta', '6x6 empate', '7x5 para o Mano Google'],
-          correct: '7x6 para o Mano Google'
-        }
-      ]
+    const DATA = {
+      politica: {
+        label: 'Política do Brasil',
+        presidents: [
+          { name: 'Deodoro da Fonseca', order: 1, period: '1889-1891', difficulty: 'facil' },
+          { name: 'Floriano Peixoto', order: 2, period: '1891-1894', difficulty: 'facil' },
+          { name: 'Prudente de Morais', order: 3, period: '1894-1898', difficulty: 'medio' },
+          { name: 'Getúlio Vargas', order: 14, period: '1930-1945 e 1951-1954', difficulty: 'facil' },
+          { name: 'Juscelino Kubitschek', order: 21, period: '1956-1961', difficulty: 'facil' },
+          { name: 'Jânio Quadros', order: 22, period: '1961', difficulty: 'medio' },
+          { name: 'João Goulart', order: 24, period: '1961-1964', difficulty: 'medio' },
+          { name: 'José Sarney', order: 31, period: '1985-1990', difficulty: 'facil' },
+          { name: 'Fernando Collor', order: 32, period: '1990-1992', difficulty: 'facil' },
+          { name: 'Itamar Franco', order: 33, period: '1992-1995', difficulty: 'medio' },
+          { name: 'Fernando Henrique Cardoso', order: 34, period: '1995-2003', difficulty: 'facil' },
+          { name: 'Luiz Inácio Lula da Silva', order: 35, period: '2003-2011 e 2023-presente', difficulty: 'facil' },
+          { name: 'Dilma Rousseff', order: 36, period: '2011-2016', difficulty: 'facil' },
+          { name: 'Michel Temer', order: 37, period: '2016-2019', difficulty: 'medio' },
+          { name: 'Jair Bolsonaro', order: 38, period: '2019-2023', difficulty: 'facil' }
+        ],
+        capitalsHistory: [
+          { year: 1763, city: 'Rio de Janeiro', difficulty: 'medio' },
+          { year: 1960, city: 'Brasília', difficulty: 'facil' }
+        ],
+        institutions: [
+          { prompt: 'Quantos senadores cada estado brasileiro e o Distrito Federal elegem?', answer: '3', wrong: ['2', '4', '5'], difficulty: 'facil' },
+          { prompt: 'Qual é a sede do Poder Executivo federal do Brasil?', answer: 'Palácio do Planalto', wrong: ['Congresso Nacional', 'Supremo Tribunal Federal', 'Palácio da Alvorada'], difficulty: 'facil' },
+          { prompt: 'Qual é a casa legislativa que representa os estados no Congresso Nacional?', answer: 'Senado Federal', wrong: ['Câmara dos Deputados', 'Assembleia Nacional', 'Conselho da República'], difficulty: 'facil' },
+          { prompt: 'Qual é o nome do tribunal de cúpula do Poder Judiciário brasileiro?', answer: 'Supremo Tribunal Federal', wrong: ['Superior Tribunal de Justiça', 'Tribunal Superior Eleitoral', 'Tribunal de Contas da União'], difficulty: 'facil' },
+          { prompt: 'Em quantos poderes se organiza a República Federativa do Brasil?', answer: '3', wrong: ['2', '4', '5'], difficulty: 'facil' },
+          { prompt: 'Quem substitui o presidente em caso de vacância simultânea do presidente e do vice, antes dos presidentes da Câmara e do Senado?', answer: 'Nenhum, o vice é o substituto direto; depois vêm Câmara, Senado e STF', wrong: ['Presidente do STF', 'Ministro da Justiça', 'Presidente do TSE'], difficulty: 'lendario' },
+          { prompt: 'Qual é a idade mínima para candidatura à Presidência da República no Brasil?', answer: '35 anos', wrong: ['30 anos', '40 anos', '45 anos'], difficulty: 'medio' },
+          { prompt: 'Qual é o voto adotado nas eleições brasileiras para cargos do Executivo?', answer: 'Voto direto e secreto', wrong: ['Voto indireto e aberto', 'Voto censitário', 'Voto distrital obrigatório'], difficulty: 'medio' }
+        ],
+        constitution: [
+          { prompt: 'Em que ano foi promulgada a atual Constituição brasileira?', answer: '1988', wrong: ['1985', '1989', '1990'], difficulty: 'facil' },
+          { prompt: 'Qual apelido é comumente dado à Constituição de 1988?', answer: 'Constituição Cidadã', wrong: ['Constituição Imperial', 'Constituição Nova República', 'Carta Liberal'], difficulty: 'medio' },
+          { prompt: 'A atual Constituição brasileira foi promulgada durante qual período político?', answer: 'Redemocratização', wrong: ['Estado Novo', 'República Velha', 'Regime Militar'], difficulty: 'medio' }
+        ]
+      },
+      futebol: {
+        label: 'Futebol',
+        clubs: [
+          { club: 'Flamengo', city: 'Rio de Janeiro', state: 'RJ', stadium: 'Maracanã', difficulty: 'facil' },
+          { club: 'Fluminense', city: 'Rio de Janeiro', state: 'RJ', stadium: 'Maracanã', difficulty: 'medio' },
+          { club: 'Vasco da Gama', city: 'Rio de Janeiro', state: 'RJ', stadium: 'São Januário', difficulty: 'medio' },
+          { club: 'Botafogo', city: 'Rio de Janeiro', state: 'RJ', stadium: 'Nilton Santos', difficulty: 'medio' },
+          { club: 'Corinthians', city: 'São Paulo', state: 'SP', stadium: 'Neo Química Arena', difficulty: 'facil' },
+          { club: 'Palmeiras', city: 'São Paulo', state: 'SP', stadium: 'Allianz Parque', difficulty: 'facil' },
+          { club: 'São Paulo', city: 'São Paulo', state: 'SP', stadium: 'Morumbi', difficulty: 'facil' },
+          { club: 'Santos', city: 'Santos', state: 'SP', stadium: 'Vila Belmiro', difficulty: 'medio' },
+          { club: 'Grêmio', city: 'Porto Alegre', state: 'RS', stadium: 'Arena do Grêmio', difficulty: 'medio' },
+          { club: 'Internacional', city: 'Porto Alegre', state: 'RS', stadium: 'Beira-Rio', difficulty: 'facil' },
+          { club: 'Cruzeiro', city: 'Belo Horizonte', state: 'MG', stadium: 'Mineirão', difficulty: 'facil' },
+          { club: 'Atlético Mineiro', city: 'Belo Horizonte', state: 'MG', stadium: 'Arena MRV', difficulty: 'medio' },
+          { club: 'Bahia', city: 'Salvador', state: 'BA', stadium: 'Arena Fonte Nova', difficulty: 'medio' },
+          { club: 'Vitória', city: 'Salvador', state: 'BA', stadium: 'Barradão', difficulty: 'medio' },
+          { club: 'Athletico Paranaense', city: 'Curitiba', state: 'PR', stadium: 'Ligga Arena', difficulty: 'medio' },
+          { club: 'Coritiba', city: 'Curitiba', state: 'PR', stadium: 'Couto Pereira', difficulty: 'medio' },
+          { club: 'Fortaleza', city: 'Fortaleza', state: 'CE', stadium: 'Arena Castelão', difficulty: 'medio' },
+          { club: 'Ceará', city: 'Fortaleza', state: 'CE', stadium: 'Arena Castelão', difficulty: 'medio' },
+          { club: 'Sport', city: 'Recife', state: 'PE', stadium: 'Ilha do Retiro', difficulty: 'medio' },
+          { club: 'Náutico', city: 'Recife', state: 'PE', stadium: 'Aflitos', difficulty: 'dificil' }
+        ],
+        worldCups: [
+          { year: 1958, host: 'Suécia', champion: 'Brasil', difficulty: 'facil' },
+          { year: 1962, host: 'Chile', champion: 'Brasil', difficulty: 'facil' },
+          { year: 1970, host: 'México', champion: 'Brasil', difficulty: 'facil' },
+          { year: 1994, host: 'Estados Unidos', champion: 'Brasil', difficulty: 'facil' },
+          { year: 2002, host: 'Coreia do Sul e Japão', champion: 'Brasil', difficulty: 'facil' },
+          { year: 2014, host: 'Brasil', champion: 'Alemanha', difficulty: 'medio' }
+        ],
+        facts: [
+          { prompt: 'Quantas estrelas representam os títulos mundiais do Brasil na camisa tradicional da seleção masculina?', answer: '5', wrong: ['4', '6', '3'], difficulty: 'facil' },
+          { prompt: 'Qual é o apelido histórico da seleção brasileira de futebol?', answer: 'Seleção Canarinho', wrong: ['Seleção Celeste', 'Seleção Albiceleste', 'Seleção Tricolor'], difficulty: 'medio' },
+          { prompt: 'Quem é conhecido como Rei do Futebol?', answer: 'Pelé', wrong: ['Garrincha', 'Zico', 'Romário'], difficulty: 'facil' },
+          { prompt: 'Em que cidade fica o estádio Maracanã?', answer: 'Rio de Janeiro', wrong: ['São Paulo', 'Belo Horizonte', 'Brasília'], difficulty: 'facil' },
+          { prompt: 'Qual clube manda seus jogos na Vila Belmiro?', answer: 'Santos', wrong: ['Corinthians', 'Botafogo', 'Bahia'], difficulty: 'facil' },
+          { prompt: 'Qual clube manda seus jogos no Morumbi?', answer: 'São Paulo', wrong: ['Palmeiras', 'Flamengo', 'Grêmio'], difficulty: 'facil' }
+        ]
+      },
+      historia: {
+        label: 'História',
+        facts: [
+          { prompt: 'Em que ano ocorreu a Proclamação da República no Brasil?', answer: '1889', wrong: ['1822', '1888', '1891'], difficulty: 'facil' },
+          { prompt: 'Em que ano foi assinada a Lei Áurea?', answer: '1888', wrong: ['1822', '1889', '1871'], difficulty: 'facil' },
+          { prompt: 'Quem liderou a Proclamação da República?', answer: 'Deodoro da Fonseca', wrong: ['Dom Pedro II', 'Floriano Peixoto', 'Getúlio Vargas'], difficulty: 'facil' },
+          { prompt: 'Em que ano ocorreu a Independência do Brasil?', answer: '1822', wrong: ['1808', '1889', '1831'], difficulty: 'facil' },
+          { prompt: 'Quem proclamou a Independência do Brasil?', answer: 'Dom Pedro I', wrong: ['Dom Pedro II', 'José Bonifácio', 'Tiradentes'], difficulty: 'facil' },
+          { prompt: 'Qual movimento teve Tiradentes como um de seus nomes mais lembrados?', answer: 'Inconfidência Mineira', wrong: ['Revolta da Chibata', 'Sabinada', 'Confederação do Equador'], difficulty: 'medio' },
+          { prompt: 'Qual foi o período do Estado Novo no Brasil?', answer: '1937-1945', wrong: ['1930-1934', '1946-1950', '1964-1985'], difficulty: 'medio' },
+          { prompt: 'Em que ano começou o regime militar no Brasil?', answer: '1964', wrong: ['1954', '1961', '1968'], difficulty: 'facil' },
+          { prompt: 'Em que ano terminou o regime militar no Brasil?', answer: '1985', wrong: ['1984', '1986', '1988'], difficulty: 'medio' },
+          { prompt: 'Quem foi a princesa regente que assinou a Lei Áurea?', answer: 'Princesa Isabel', wrong: ['Maria Leopoldina', 'Carlota Joaquina', 'Anita Garibaldi'], difficulty: 'facil' },
+          { prompt: 'Qual era o nome do imperador do Brasil deposto em 1889?', answer: 'Dom Pedro II', wrong: ['Dom Pedro I', 'Dom João VI', 'Dom Luís'], difficulty: 'facil' },
+          { prompt: 'A chegada da família real portuguesa ao Brasil ocorreu em que ano?', answer: '1808', wrong: ['1822', '1789', '1815'], difficulty: 'medio' },
+          { prompt: 'Em qual cidade foi assinado o grito da Independência, às margens do Ipiranga?', answer: 'São Paulo', wrong: ['Rio de Janeiro', 'Salvador', 'Petrópolis'], difficulty: 'medio' },
+          { prompt: 'Qual conflito opôs o Paraguai à Tríplice Aliança?', answer: 'Guerra do Paraguai', wrong: ['Guerra dos Farrapos', 'Guerra de Canudos', 'Guerra do Contestado'], difficulty: 'medio' },
+          { prompt: 'Quem foi o presidente que se suicidou em 1954?', answer: 'Getúlio Vargas', wrong: ['Jânio Quadros', 'Juscelino Kubitschek', 'João Goulart'], difficulty: 'medio' },
+          { prompt: 'Qual foi o movimento liderado por Antônio Conselheiro?', answer: 'Guerra de Canudos', wrong: ['Revolta da Vacina', 'Sabinada', 'Balaiada'], difficulty: 'dificil' },
+          { prompt: 'Qual revolta urbana do início do século XX ocorreu no Rio de Janeiro contra a vacinação obrigatória?', answer: 'Revolta da Vacina', wrong: ['Revolta da Armada', 'Revolta da Chibata', 'Intentona Comunista'], difficulty: 'medio' },
+          { prompt: 'Qual navegador português chegou ao Brasil em 1500?', answer: 'Pedro Álvares Cabral', wrong: ['Vasco da Gama', 'Fernão de Magalhães', 'Bartolomeu Dias'], difficulty: 'facil' },
+          { prompt: 'Em que ano ocorreu a chegada portuguesa ao território que hoje é o Brasil?', answer: '1500', wrong: ['1492', '1502', '1530'], difficulty: 'facil' },
+          { prompt: 'Qual constituição foi a primeira do Brasil?', answer: 'Constituição de 1824', wrong: ['Constituição de 1891', 'Constituição de 1934', 'Constituição de 1988'], difficulty: 'dificil' }
+        ]
+      },
+      gerais: {
+        label: 'Conhecimentos Gerais',
+        facts: [
+          { prompt: 'Qual é o maior planeta do Sistema Solar?', answer: 'Júpiter', wrong: ['Saturno', 'Marte', 'Netuno'], difficulty: 'facil' },
+          { prompt: 'Qual é a fórmula química da água?', answer: 'H2O', wrong: ['CO2', 'O2', 'NaCl'], difficulty: 'facil' },
+          { prompt: 'Quantos continentes são tradicionalmente considerados no modelo mais comum ensinado no Brasil?', answer: '6', wrong: ['5', '7', '8'], difficulty: 'medio' },
+          { prompt: 'Qual é o maior oceano da Terra?', answer: 'Pacífico', wrong: ['Atlântico', 'Índico', 'Ártico'], difficulty: 'facil' },
+          { prompt: 'Qual é a capital da França?', answer: 'Paris', wrong: ['Londres', 'Roma', 'Madri'], difficulty: 'facil' },
+          { prompt: 'Qual é o elemento químico representado pelo símbolo Au?', answer: 'Ouro', wrong: ['Prata', 'Argônio', 'Alumínio'], difficulty: 'medio' },
+          { prompt: 'Qual é o resultado de 9 x 8?', answer: '72', wrong: ['64', '81', '69'], difficulty: 'facil' },
+          { prompt: 'Qual animal é conhecido como o maior mamífero do planeta?', answer: 'Baleia-azul', wrong: ['Elefante africano', 'Orca', 'Girafa'], difficulty: 'facil' },
+          { prompt: 'Quantos lados tem um hexágono?', answer: '6', wrong: ['5', '7', '8'], difficulty: 'facil' },
+          { prompt: 'Quem escreveu Dom Casmurro?', answer: 'Machado de Assis', wrong: ['José de Alencar', 'Clarice Lispector', 'Graciliano Ramos'], difficulty: 'medio' },
+          { prompt: 'Qual é a capital do Japão?', answer: 'Tóquio', wrong: ['Pequim', 'Seul', 'Kyoto'], difficulty: 'facil' },
+          { prompt: 'Qual é o gás mais abundante na atmosfera terrestre?', answer: 'Nitrogênio', wrong: ['Oxigênio', 'Gás carbônico', 'Hidrogênio'], difficulty: 'medio' },
+          { prompt: 'Qual é a unidade básica da vida?', answer: 'Célula', wrong: ['Átomo', 'Molécula', 'Tecido'], difficulty: 'facil' },
+          { prompt: 'Qual planeta é conhecido como Planeta Vermelho?', answer: 'Marte', wrong: ['Vênus', 'Mercúrio', 'Júpiter'], difficulty: 'facil' },
+          { prompt: 'Qual é o rio mais extenso do Brasil?', answer: 'Amazonas', wrong: ['São Francisco', 'Paraná', 'Tocantins'], difficulty: 'medio' },
+          { prompt: 'Qual instrumento mede a temperatura?', answer: 'Termômetro', wrong: ['Barômetro', 'Higrômetro', 'Altímetro'], difficulty: 'facil' },
+          { prompt: 'Qual é o processo pelo qual as plantas produzem seu alimento?', answer: 'Fotossíntese', wrong: ['Respiração', 'Fermentação', 'Digestão'], difficulty: 'facil' },
+          { prompt: 'Qual é a raiz quadrada de 144?', answer: '12', wrong: ['14', '16', '10'], difficulty: 'medio' },
+          { prompt: 'Qual é o idioma mais falado no Brasil?', answer: 'Português', wrong: ['Espanhol', 'Inglês', 'Francês'], difficulty: 'facil' },
+          { prompt: 'Qual é o metal líquido em temperatura ambiente?', answer: 'Mercúrio', wrong: ['Ferro', 'Cobre', 'Zinco'], difficulty: 'dificil' }
+        ]
+      }
     };
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function pickWrongFromList(list, current, key, count = 3) {
+      const candidates = shuffle(list.filter(item => item[key] !== current[key]).map(item => item[key]));
+      return candidates.slice(0, count);
+    }
+
+    function makeQuestion(category, difficulty, question, correct, wrong) {
+      const options = shuffle([correct, ...wrong.slice(0, 3)]);
+      return { category, difficulty, question, options, correct };
+    }
+
+    function buildPoliticsQuestions() {
+      const qs = [];
+      const d = DATA.politica;
+
+      d.presidents.forEach(p => {
+        qs.push(makeQuestion('politica', p.difficulty, `Qual presidente do Brasil governou no período ${p.period}?`, p.name, pickWrongFromList(d.presidents, p, 'name')));
+        qs.push(makeQuestion('politica', p.difficulty, `Qual a posição de ${p.name} na numeração histórica dos presidentes do Brasil?`, String(p.order), shuffle(d.presidents.filter(x => x.order !== p.order).map(x => String(x.order))).slice(0, 3)));
+      });
+
+      d.capitalsHistory.forEach(c => {
+        qs.push(makeQuestion('politica', c.difficulty, `Em que ano ${c.city} passou a ser capital do Brasil?`, String(c.year), shuffle(['1549', '1763', '1822', '1891', '1960', '1964'].filter(x => x !== String(c.year))).slice(0, 3)));
+      });
+
+      d.institutions.forEach(item => {
+        qs.push(makeQuestion('politica', item.difficulty, item.prompt, item.answer, item.wrong));
+      });
+
+      d.constitution.forEach(item => {
+        qs.push(makeQuestion('politica', item.difficulty, item.prompt, item.answer, item.wrong));
+      });
+
+      return qs;
+    }
+
+    function buildFootballQuestions() {
+      const qs = [];
+      const d = DATA.futebol;
+
+      d.clubs.forEach(c => {
+        qs.push(makeQuestion('futebol', c.difficulty, `Qual é o estádio associado ao ${c.club}?`, c.stadium, pickWrongFromList(d.clubs, c, 'stadium')));
+        qs.push(makeQuestion('futebol', c.difficulty, `De qual cidade é o clube ${c.club}?`, c.city, pickWrongFromList(d.clubs, c, 'city')));
+        qs.push(makeQuestion('futebol', c.difficulty, `${c.club} é um clube de qual estado brasileiro?`, c.state, pickWrongFromList(d.clubs, c, 'state')));
+      });
+
+      d.worldCups.forEach(wc => {
+        qs.push(makeQuestion('futebol', wc.difficulty, `Quem venceu a Copa do Mundo de ${wc.year}, sediada em ${wc.host}?`, wc.champion, shuffle(['Brasil', 'Alemanha', 'Argentina', 'Itália', 'França', 'Espanha'].filter(x => x !== wc.champion)).slice(0, 3)));
+        qs.push(makeQuestion('futebol', wc.difficulty, `Em qual país ocorreu a Copa do Mundo de ${wc.year}, vencida por ${wc.champion}?`, wc.host, shuffle(d.worldCups.filter(x => x.host !== wc.host).map(x => x.host)).slice(0, 3)));
+      });
+
+      d.facts.forEach(item => {
+        qs.push(makeQuestion('futebol', item.difficulty, item.prompt, item.answer, item.wrong));
+      });
+
+      return qs;
+    }
+
+    function buildHistoryQuestions() {
+      return DATA.historia.facts.map(item => makeQuestion('historia', item.difficulty, item.prompt, item.answer, item.wrong));
+    }
+
+    function buildGeneralQuestions() {
+      return DATA.gerais.facts.map(item => makeQuestion('gerais', item.difficulty, item.prompt, item.answer, item.wrong));
+    }
+
+    function buildQuestionPool() {
+      const pool = [
+        ...buildPoliticsQuestions(),
+        ...buildFootballQuestions(),
+        ...buildHistoryQuestions(),
+        ...buildGeneralQuestions()
+      ];
+      return shuffle(pool);
+    }
+
+    const ALL_QUESTIONS = buildQuestionPool();
 
     let gameMode = 'solo';
     let tournamentName = 'Quiz Arena';
     let player1Name = '';
     let player2Name = '';
     let totalQuestions = 10;
+    let selectedTheme = 'misto';
+    let selectedDifficulty = 'misto';
+    let questionTimer = 15;
     let questions = [];
     let currentIndex = 0;
     let score1 = 0;
@@ -489,8 +665,7 @@
     let currentQuestion = null;
     let currentPlayer = 1;
     let timer = null;
-    let timeLeft = 20;
-    let usedFifty = false;
+    let timeLeft = 15;
     let usedSkip = false;
     let answered = false;
 
@@ -503,8 +678,11 @@
     const questionCountInput = document.getElementById('questionCount');
     const player1Input = document.getElementById('player1');
     const player2Input = document.getElementById('player2');
-    const previewText = document.getElementById('previewText');
+    const themeSelect = document.getElementById('themeSelect');
+    const difficultySelect = document.getElementById('difficultySelect');
+    const timerSelect = document.getElementById('timerSelect');
     const championsList = document.getElementById('championsList');
+    const poolInfo = document.getElementById('poolInfo');
 
     const gameTitle = document.getElementById('gameTitle');
     const gameSubtitle = document.getElementById('gameSubtitle');
@@ -516,14 +694,14 @@
     const versusText = document.getElementById('versusText');
     const roundText = document.getElementById('roundText');
     const categoryText = document.getElementById('categoryText');
+    const difficultyText = document.getElementById('difficultyText');
     const timerText = document.getElementById('timerText');
-    const turnText = document.getElementById('turnText');
+    const turnBadge = document.getElementById('turnBadge');
     const questionText = document.getElementById('questionText');
     const optionsWrap = document.getElementById('optionsWrap');
     const feedbackText = document.getElementById('feedbackText');
     const historyList = document.getElementById('historyList');
     const winnerBox = document.getElementById('winnerBox');
-    const fiftyBtn = document.getElementById('fiftyBtn');
     const skipBtn = document.getElementById('skipBtn');
 
     function getChampions() {
@@ -550,56 +728,18 @@
       championsList.innerHTML = champions.map(item => `<div class="champion-item">${item}</div>`).join('');
     }
 
-    function shuffle(array) {
-      const arr = [...array];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
     function formatCategory(key) {
+      return DATA[key]?.label || key;
+    }
+
+    function formatDifficulty(value) {
       const map = {
-        politica: 'Política',
-        futebol: 'Futebol',
-        pokemon: 'Pokémon',
-        internet: 'Internet',
-        pegadinhas: 'Pegadinhas',
-        cultura_pop: 'Cultura pop'
+        facil: 'Fácil',
+        medio: 'Médio',
+        dificil: 'Difícil',
+        lendario: 'Lendário'
       };
-      return map[key] || key;
-    }
-
-    function buildPool() {
-      const pool = [];
-      Object.entries(questionBase).forEach(([category, items]) => {
-        items.forEach(item => {
-          pool.push({
-            category,
-            question: item.question,
-            options: shuffle(item.options),
-            correct: item.correct
-          });
-        });
-      });
-      return pool;
-    }
-
-    function generateQuestions(amount) {
-      const pool = shuffle(buildPool());
-      const selected = [];
-      for (let i = 0; i < amount; i++) {
-        const baseQuestion = pool[i % pool.length];
-        selected.push({
-          round: i + 1,
-          category: baseQuestion.category,
-          question: baseQuestion.question,
-          options: shuffle(baseQuestion.options),
-          correct: baseQuestion.correct
-        });
-      }
-      return selected;
+      return map[value] || value;
     }
 
     function setMode(mode) {
@@ -611,10 +751,29 @@
       label1.textContent = mode === 'solo' ? 'Nome do jogador' : 'Nome do jogador 1';
     }
 
-    function previewQuestions() {
-      const amount = Number(questionCountInput.value);
-      const preview = generateQuestions(Math.min(amount, 6));
-      previewText.innerHTML = preview.map(q => `• [${formatCategory(q.category)}] ${q.question}`).join('<br>');
+    function filterPool(theme, difficulty) {
+      return ALL_QUESTIONS.filter(q => {
+        const themeOk = theme === 'misto' ? true : q.category === theme;
+        const diffOk = difficulty === 'misto' ? true : q.difficulty === difficulty;
+        return themeOk && diffOk;
+      });
+    }
+
+    function updatePoolInfo() {
+      const filtered = filterPool(themeSelect.value, difficultySelect.value);
+      poolInfo.textContent = `Banco atual: ${filtered.length} perguntas possíveis com os filtros selecionados. Banco total gerado: ${ALL_QUESTIONS.length} perguntas.`;
+    }
+
+    function generateQuestions(amount, theme, difficulty) {
+      const filtered = filterPool(theme, difficulty);
+      if (!filtered.length) return [];
+      const shuffled = shuffle(filtered);
+      const selected = [];
+      for (let i = 0; i < amount; i++) {
+        const base = shuffled[i % shuffled.length];
+        selected.push({ ...base, round: i + 1, options: shuffle(base.options) });
+      }
+      return selected;
     }
 
     function updateScoreboard() {
@@ -643,7 +802,7 @@
 
     function startTimer() {
       clearInterval(timer);
-      timeLeft = 20;
+      timeLeft = questionTimer;
       timerText.textContent = `${timeLeft}s`;
       timer = setInterval(() => {
         timeLeft -= 1;
@@ -668,17 +827,16 @@
       }
 
       clearInterval(timer);
-      usedFifty = false;
       answered = false;
-      fiftyBtn.disabled = false;
       skipBtn.disabled = usedSkip;
       feedbackText.textContent = '';
 
       currentQuestion = questions[currentIndex];
       roundText.textContent = `${currentQuestion.round} / ${questions.length}`;
       categoryText.textContent = formatCategory(currentQuestion.category);
+      difficultyText.textContent = formatDifficulty(currentQuestion.difficulty);
       questionText.textContent = currentQuestion.question;
-      turnText.textContent = gameMode === 'solo'
+      turnBadge.textContent = gameMode === 'solo'
         ? `Vez de ${player1Name}`
         : `Vez de ${currentPlayer === 1 ? player1Name : player2Name}`;
 
@@ -704,7 +862,6 @@
     function revealAnswer(selectedIndex, selectedBtn = null) {
       const buttons = [...document.querySelectorAll('.option-btn')];
       const correctIndex = currentQuestion.options.findIndex(opt => opt === currentQuestion.correct);
-
       buttons.forEach((button, idx) => {
         if (idx === correctIndex) button.classList.add('correct');
       });
@@ -736,28 +893,12 @@
 
       updateScoreboard();
       skipBtn.disabled = true;
-      fiftyBtn.disabled = true;
 
       setTimeout(() => {
         currentIndex += 1;
         if (gameMode === 'duel') currentPlayer = currentPlayer === 1 ? 2 : 1;
         renderQuestion();
       }, 1600);
-    }
-
-    function useFifty() {
-      if (usedFifty || answered) return;
-      usedFifty = true;
-      fiftyBtn.disabled = true;
-      const correctIndex = currentQuestion.options.findIndex(opt => opt === currentQuestion.correct);
-      const buttons = [...document.querySelectorAll('.option-btn')];
-      let removed = 0;
-      buttons.forEach((button, idx) => {
-        if (idx !== correctIndex && removed < 2) {
-          button.style.visibility = 'hidden';
-          removed += 1;
-        }
-      });
     }
 
     function skipQuestion() {
@@ -778,11 +919,10 @@
       clearInterval(timer);
       optionsWrap.innerHTML = '';
       questionText.textContent = 'Fim do torneio.';
-      turnText.textContent = 'Resultado final';
+      turnBadge.textContent = 'Resultado final';
       roundText.textContent = `${questions.length} / ${questions.length}`;
       timerText.textContent = '0s';
       feedbackText.textContent = '';
-      fiftyBtn.disabled = true;
       skipBtn.disabled = true;
       winnerBox.style.display = 'block';
 
@@ -806,7 +946,16 @@
       player1Name = player1Input.value.trim() || 'Jogador 1';
       player2Name = gameMode === 'duel' ? (player2Input.value.trim() || 'Jogador 2') : '';
       totalQuestions = Number(questionCountInput.value);
-      questions = generateQuestions(totalQuestions);
+      selectedTheme = themeSelect.value;
+      selectedDifficulty = difficultySelect.value;
+      questionTimer = Number(timerSelect.value);
+      questions = generateQuestions(totalQuestions, selectedTheme, selectedDifficulty);
+
+      if (!questions.length) {
+        alert('Não há perguntas disponíveis para essa combinação de tema e dificuldade.');
+        return;
+      }
+
       currentIndex = 0;
       score1 = 0;
       score2 = 0;
@@ -818,7 +967,7 @@
 
       gameTitle.textContent = tournamentName;
       gameSubtitle.textContent = gameMode === 'solo'
-        ? `${player1Name} em modo solo`
+        ? `${player1Name} em modo solo • ${formatCategory(selectedTheme) === 'misto' ? 'Tema misto' : formatCategory(selectedTheme)}`
         : `${player1Name} vs ${player2Name}`;
 
       updateGameLayout();
@@ -834,6 +983,7 @@
       gamePanel.classList.add('hidden');
       setupPanel.classList.remove('hidden');
       renderChampions();
+      updatePoolInfo();
     }
 
     function resetAll() {
@@ -848,27 +998,30 @@
       player2Input.value = '';
       tournamentNameInput.value = 'Quiz Arena';
       questionCountInput.value = '10';
-      previewText.textContent = 'Clique em “Gerar prévia” para ver exemplos de perguntas.';
+      themeSelect.value = 'misto';
+      difficultySelect.value = 'misto';
+      timerSelect.value = '15';
       historyList.innerHTML = '';
       winnerBox.style.display = 'none';
       setupPanel.classList.remove('hidden');
       gamePanel.classList.add('hidden');
       setMode('solo');
       renderChampions();
+      updatePoolInfo();
     }
 
     soloModeCard.addEventListener('click', () => setMode('solo'));
     duelModeCard.addEventListener('click', () => setMode('duel'));
-    document.getElementById('previewBtn').addEventListener('click', previewQuestions);
     document.getElementById('startBtn').addEventListener('click', startGame);
-    fiftyBtn.addEventListener('click', useFifty);
     skipBtn.addEventListener('click', skipQuestion);
     document.getElementById('backBtn').addEventListener('click', goBack);
     document.getElementById('resetBtn').addEventListener('click', resetAll);
+    themeSelect.addEventListener('change', updatePoolInfo);
+    difficultySelect.addEventListener('change', updatePoolInfo);
 
     setMode('solo');
     renderChampions();
-    previewQuestions();
+    updatePoolInfo();
   </script>
 </body>
 </html>
