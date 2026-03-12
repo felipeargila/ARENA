@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
 <meta charset="UTF-8">
+
 <title>AI Quiz Arena</title>
 
 <style>
 
 body{
-font-family:Arial;
-background:#111;
+background:#121212;
 color:white;
+font-family:Arial;
 text-align:center;
 }
 
 button{
-padding:10px 20px;
-margin:10px;
+padding:10px;
+margin:8px;
 font-size:16px;
 cursor:pointer;
 }
@@ -24,32 +27,33 @@ cursor:pointer;
 display:block;
 width:300px;
 margin:10px auto;
-padding:10px;
+padding:12px;
 background:#333;
 border:none;
 color:white;
 }
 
-.correct{
-background:green;
-}
+.correct{background:green;}
+.wrong{background:red;}
 
-.wrong{
-background:red;
+#timer{
+font-size:22px;
+margin:10px;
 }
 
 </style>
+
 </head>
+
 <body>
 
-<h1 id="title">AI QUIZ ARENA</h1>
+<h1>AI QUIZ ARENA</h1>
 
 <div id="setup">
 
-<h3>Modo</h3>
+<button onclick="startGame('solo')">Modo Solo</button>
 
-<button onclick="startGame('solo')">Jogador único</button>
-<button onclick="startGame('duelo')">Duelo</button>
+<button onclick="startGame('duelo')">Modo Duelo</button>
 
 <br><br>
 
@@ -63,13 +67,19 @@ background:red;
 
 <h2 id="turn"></h2>
 
+<div id="timer"></div>
+
 <h3 id="question"></h3>
 
 <div id="options"></div>
 
-<h3 id="score"></h3>
+<br>
 
-<button onclick="nextQuestion()">Próxima</button>
+<button onclick="skip()">Pular</button>
+
+<button onclick="fifty()">50/50</button>
+
+<h3 id="score"></h3>
 
 </div>
 
@@ -77,82 +87,137 @@ background:red;
 
 // BASE DE CONHECIMENTO
 
-const base = [
+const politicians=[
+{name:"Aécio Neves",party:"PMDB"},
+{name:"Fernando Henrique",party:"MDB"},
+{name:"Lula",party:"PT"}
+]
 
-{
-question:"Qual foi o primeiro partido de Aécio Neves?",
-options:["PSDB","PMDB","PFL","PTB"],
-correct:1
-},
+const stadiums=[
+{team:"Goiatuba",stadium:"Estádio Divino Garcia Rosa"},
+{team:"Flamengo",stadium:"Maracanã"},
+{team:"Palmeiras",stadium:"Allianz Parque"}
+]
 
-{
-question:"Quem venceu a Copa Pistão em Carros 1?",
-options:["Relâmpago McQueen","Chick Hicks","The King","Guido"],
-correct:1
-},
+const pokemonFirst="Rhydon"
 
-{
-question:"Qual foi o primeiro Pokémon criado?",
-options:["Bulbasaur","Rhydon","Mew","Pikachu"],
-correct:1
-},
-
-{
-question:"Qual é o estádio do Goiatuba?",
-options:[
-Estádio Divino Garcia Rosa,
-Mineirão,
-Serra Dourada,
-Morumbi
-],
-correct:0
-},
-
-{
-question:"Quando Ciro Gomes foi candidato a presidente?",
-options:[
-"1998, 2002, 2018, 2022",
-"1994, 1998, 2014",
-"2006, 2010, 2018",
-"2002, 2010, 2014"
-],
-correct:0
-}
-
-];
+const carsWinner="Chick Hicks"
 
 let mode
-let currentPlayer=1
 let score1=0
 let score2=0
-let currentQuestion
+let currentPlayer=1
+let currentCorrect
+let timer
+let time=15
 
 function startGame(m){
 
 mode=m
 
 document.getElementById("setup").style.display="none"
+
 document.getElementById("game").style.display="block"
 
 nextQuestion()
 
 }
 
+function random(arr){
+
+return arr[Math.floor(Math.random()*arr.length)]
+
+}
+
+function shuffle(arr){
+
+return arr.sort(()=>Math.random()-0.5)
+
+}
+
+function generateQuestion(){
+
+let type=Math.floor(Math.random()*4)
+
+if(type===0){
+
+let p=random(politicians)
+
+let options=[p.party,"PSDB","PFL","PTB"]
+
+shuffle(options)
+
+currentCorrect=options.indexOf(p.party)
+
+return{
+text:"Qual foi o primeiro partido de "+p.name+"?",
+options:options
+}
+
+}
+
+if(type===1){
+
+let s=random(stadiums)
+
+let options=[s.stadium,"Mineirão","Morumbi","Serra Dourada"]
+
+shuffle(options)
+
+currentCorrect=options.indexOf(s.stadium)
+
+return{
+text:"Qual é o estádio do "+s.team+"?",
+options:options
+}
+
+}
+
+if(type===2){
+
+let options=["Bulbasaur",pokemonFirst,"Mew","Pikachu"]
+
+shuffle(options)
+
+currentCorrect=options.indexOf(pokemonFirst)
+
+return{
+text:"Qual foi o primeiro Pokémon criado?",
+options:options
+}
+
+}
+
+if(type===3){
+
+let options=["Relâmpago McQueen",carsWinner,"The King","Guido"]
+
+shuffle(options)
+
+currentCorrect=options.indexOf(carsWinner)
+
+return{
+text:"Quem venceu a Copa Pistão em Carros 1?",
+options:options
+}
+
+}
+
+}
+
 function nextQuestion(){
 
-const q = base[Math.floor(Math.random()*base.length)]
+let q=generateQuestion()
 
-currentQuestion=q
+document.getElementById("question").innerText=q.text
 
-document.getElementById("question").innerText=q.question
+let optDiv=document.getElementById("options")
 
-const optionsDiv=document.getElementById("options")
-
-optionsDiv.innerHTML=""
+optDiv.innerHTML=""
 
 q.options.forEach((opt,i)=>{
 
-const btn=document.createElement("button")
+let btn=document.createElement("button")
 
 btn.className="option"
 
@@ -160,23 +225,49 @@ btn.innerText=opt
 
 btn.onclick=()=>answer(i,btn)
 
-optionsDiv.appendChild(btn)
+optDiv.appendChild(btn)
 
 })
+
+startTimer()
 
 updateUI()
 
 }
 
+function startTimer(){
+
+clearInterval(timer)
+
+time=15
+
+timer=setInterval(()=>{
+
+time--
+
+document.getElementById("timer").innerText="Tempo: "+time
+
+if(time<=0){
+
+clearInterval(timer)
+
+nextQuestion()
+
+}
+
+},1000)
+
+}
+
 function answer(i,btn){
 
-const correct=currentQuestion.correct
+clearInterval(timer)
 
-const buttons=document.querySelectorAll(".option")
+let buttons=document.querySelectorAll(".option")
 
 buttons.forEach(b=>b.disabled=true)
 
-if(i===correct){
+if(i===currentCorrect){
 
 btn.classList.add("correct")
 
@@ -193,7 +284,7 @@ else score2++
 
 btn.classList.add("wrong")
 
-buttons[correct].classList.add("correct")
+buttons[currentCorrect].classList.add("correct")
 
 }
 
@@ -204,23 +295,44 @@ updateUI()
 function updateUI(){
 
 let p1=document.getElementById("player1").value||"Jogador1"
+
 let p2=document.getElementById("player2").value||"Jogador2"
 
-document.getElementById("score").innerText=
-p1+" "+score1+" x "+score2+" "+p2
+document.getElementById("score").innerText=p1+" "+score1+" x "+score2+" "+p2
 
 if(mode==="duelo"){
 
-document.getElementById("turn").innerText=
-"Turno de "+(currentPlayer===1?p1:p2)
+document.getElementById("turn").innerText="Turno de "+(currentPlayer===1?p1:p2)
 
 currentPlayer=currentPlayer===1?2:1
 
-}else{
-
-document.getElementById("turn").innerText=""
+}
 
 }
+
+function skip(){
+
+nextQuestion()
+
+}
+
+function fifty(){
+
+let buttons=document.querySelectorAll(".option")
+
+let removed=0
+
+buttons.forEach((b,i)=>{
+
+if(i!==currentCorrect && removed<2){
+
+b.style.display="none"
+
+removed++
+
+}
+
+})
 
 }
 
